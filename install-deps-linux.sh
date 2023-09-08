@@ -16,10 +16,10 @@ fi
 # libsodium
 sodium_install=$PWD/sodium
 if [ ! -f $sodium_install/include/sodium.h ]; then
-    wget https://download.libsodium.org/libsodium/releases/libsodium-1.0.17.tar.gz
-    tar -xf libsodium-1.0.17.tar.gz
+    wget https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz
+    tar -xf libsodium-1.0.18.tar.gz
     mkdir -p $sodium_install
-    pushd libsodium-1.0.17
+    pushd libsodium-1.0.18
     ./configure --quiet --prefix=$sodium_install --enable-static --disable-shared && \
         make --quiet && \
         make --quiet install
@@ -28,7 +28,7 @@ fi
 
 boost_install=$PWD/boost
 if [ ! -f $boost_install/lib/libboost_system.a ]; then
-    wget https://dl.bintray.com/boostorg/release/1.67.0/source/boost_1_67_0.tar.gz
+    wget https://boostorg.jfrog.io/artifactory/main/release/1.67.0/source/boost_1_67_0.tar.gz
     tar -xf boost_1_67_0.tar.gz
     mkdir -p $boost_install
     pushd boost_1_67_0

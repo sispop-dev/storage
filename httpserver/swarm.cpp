@@ -1,6 +1,6 @@
 #include "swarm.h"
 #include "http_connection.h"
-#include "loki_logger.h"
+#include "sispop_logger.h"
 
 #include "service_node.h"
 
@@ -10,7 +10,7 @@
 
 #include "utils.hpp"
 
-namespace loki {
+namespace sispop {
 
 static bool swarm_exists(const all_swarms_t& all_swarms,
                          const swarm_id_t& swarm) {
@@ -121,13 +121,13 @@ SwarmEvents Swarm::derive_swarm_events(const all_swarms_t& swarms) const {
 void Swarm::set_swarm_id(swarm_id_t sid) {
 
     if (sid == INVALID_SWARM_ID) {
-        LOKI_LOG(warn, "We are not currently an active Service Node");
+        SISPOP_LOG(warn, "We are not currently an active Service Node");
     } else {
 
         if (cur_swarm_id_ == INVALID_SWARM_ID) {
-            LOKI_LOG(info, "EVENT: started SN in swarm: {}", sid);
+            SISPOP_LOG(info, "EVENT: started SN in swarm: {}", sid);
         } else if (cur_swarm_id_ != sid) {
-            LOKI_LOG(info, "EVENT: got moved into a new swarm: {}", sid);
+            SISPOP_LOG(info, "EVENT: got moved into a new swarm: {}", sid);
         }
     }
 
@@ -177,15 +177,15 @@ void Swarm::update_state(const all_swarms_t& swarms,
                          const SwarmEvents& events) {
 
     if (events.dissolved) {
-        LOKI_LOG(info, "EVENT: our old swarm got DISSOLVED!");
+        SISPOP_LOG(info, "EVENT: our old swarm got DISSOLVED!");
     }
 
     for (const sn_record_t& sn : events.new_snodes) {
-        LOKI_LOG(info, "EVENT: detected new SN: {}", sn);
+        SISPOP_LOG(info, "EVENT: detected new SN: {}", sn);
     }
 
     for (swarm_id_t swarm : events.new_swarms) {
-        LOKI_LOG(info, "EVENT: detected a new swarm: {}", swarm);
+        SISPOP_LOG(info, "EVENT: detected a new swarm: {}", swarm);
     }
 
     apply_swarm_changes(swarms);
@@ -362,4 +362,4 @@ const std::vector<sn_record_t>& Swarm::other_nodes() const {
     return swarm_peers_;
 }
 
-} // namespace loki
+} // namespace sispop

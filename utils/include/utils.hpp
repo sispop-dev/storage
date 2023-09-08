@@ -22,7 +22,7 @@ bool parseTimestamp(const std::string& timestampString, const uint64_t ttl,
 // Get current time in milliseconds
 uint64_t get_time_ms();
 
-// adapted from Lokinet llarp/encode.hpp
+// adapted from Sispopnet llarp/encode.hpp
 // from  https://en.wikipedia.org/wiki/Base32#z-base-32
 static const char zbase32_alpha[] = {'y', 'b', 'n', 'd', 'r', 'f', 'g', '8',
                                      'e', 'j', 'k', 'm', 'c', 'p', 'q', 'x',
@@ -141,7 +141,7 @@ inline std::string as_hex(const String &s) {
 /// Returns a random number from [0, n) using a static generator
 uint64_t uniform_distribution_portable(uint64_t n);
 
-/// Returns a random number from [0, n); (copied from lokid)
+/// Returns a random number from [0, n); (copied from sispopd)
 uint64_t uniform_distribution_portable(std::mt19937_64& mersenne_twister,
                                        uint64_t n);
 

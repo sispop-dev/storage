@@ -17,7 +17,6 @@ set(HEADER_FILES
     security.h
     command_line.h
     net_stats.h
-    dns_text_records.h
     reachability_testing.h
     )
 
@@ -32,17 +31,16 @@ set(SRC_FILES
     stats.cpp
     security.cpp
     command_line.cpp
-    dns_text_records.cpp
     reachability_testing.cpp
     )
 
 add_library(httpserver_lib STATIC ${HEADER_FILES} ${SRC_FILES})
 
-loki_add_subdirectory(../common common)
-loki_add_subdirectory(../storage storage)
-loki_add_subdirectory(../utils utils)
-loki_add_subdirectory(../pow pow)
-loki_add_subdirectory(../crypto crypto)
+sispop_add_subdirectory(../common common)
+sispop_add_subdirectory(../storage storage)
+sispop_add_subdirectory(../utils utils)
+sispop_add_subdirectory(../pow pow)
+sispop_add_subdirectory(../crypto crypto)
 find_package(OpenSSL REQUIRED)
 
 find_package(Boost
@@ -66,7 +64,7 @@ set_property(TARGET httpserver_lib PROPERTY CXX_STANDARD 14)
 target_include_directories(httpserver_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS})
 target_link_libraries(httpserver_lib PUBLIC ${Boost_LIBRARIES})
 
-set(BIN_NAME loki-storage)
+set(BIN_NAME sispop-storage)
 
 add_executable(httpserver main.cpp)
 set_target_properties(httpserver PROPERTIES OUTPUT_NAME ${BIN_NAME})

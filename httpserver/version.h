@@ -1,19 +1,19 @@
 #pragma once
 
-#include "loki_logger.h"
+#include "sispop_logger.h"
 
 #include <iostream>
 
-#define VERSION_MAJOR 1
+#define VERSION_MAJOR 2
 #define VERSION_MINOR 0
 #define VERSION_PATCH 9
 
-#define LOKI_STRINGIFY2(val) #val
-#define LOKI_STRINGIFY(val) LOKI_STRINGIFY2(val)
+#define SISPOP_STRINGIFY2(val) #val
+#define SISPOP_STRINGIFY(val) SISPOP_STRINGIFY2(val)
 
-#define VERSION_MAJOR_STR LOKI_STRINGIFY(VERSION_MAJOR)
-#define VERSION_MINOR_STR LOKI_STRINGIFY(VERSION_MINOR)
-#define VERSION_PATCH_STR LOKI_STRINGIFY(VERSION_PATCH)
+#define VERSION_MAJOR_STR SISPOP_STRINGIFY(VERSION_MAJOR)
+#define VERSION_MINOR_STR SISPOP_STRINGIFY(VERSION_MINOR)
+#define VERSION_PATCH_STR SISPOP_STRINGIFY(VERSION_PATCH)
 
 #ifndef STORAGE_SERVER_VERSION_STRING
 #define STORAGE_SERVER_VERSION_STRING                                          \
@@ -29,8 +29,8 @@
 #endif
 
 static void print_version() {
-    LOKI_LOG(info,
-             "Loki Storage Server v{}\n git commit hash: {}\n build time: {}",
+    SISPOP_LOG(info,
+             "Sispop Storage Server v{}\n git commit hash: {}\n build time: {}",
              STORAGE_SERVER_VERSION_STRING, STORAGE_SERVER_GIT_HASH_STRING,
              STORAGE_SERVER_BUILD_TIME);
 }

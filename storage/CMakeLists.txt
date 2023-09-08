@@ -17,11 +17,11 @@ target_include_directories(storage
     ${CMAKE_CURRENT_LIST_DIR}/src
 )
 
-loki_add_subdirectory(../common common)
+sispop_add_subdirectory(../common common)
 target_link_libraries(storage PRIVATE common)
-loki_add_subdirectory(../utils utils)
+sispop_add_subdirectory(../utils utils)
 target_link_libraries(storage PRIVATE utils)
-loki_add_subdirectory(../vendors/sqlite sqlite)
+sispop_add_subdirectory(../vendors/sqlite sqlite)
 target_link_libraries(storage PRIVATE sqlite)
 
 

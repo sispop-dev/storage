@@ -13,8 +13,8 @@
 #include <boost/optional.hpp>
 #include <boost/thread/thread.hpp>
 
-#include "loki_common.h"
-#include "lokid_key.h"
+#include "sispop_common.h"
+#include "sispopd_key.h"
 #include "pow.hpp"
 #include "reachability_testing.h"
 #include "stats.h"
@@ -29,7 +29,7 @@ class Database;
 namespace http = boost::beast::http;
 using request_t = http::request<http::string_body>;
 
-namespace loki {
+namespace sispop {
 
 namespace storage {
 struct Item;
@@ -39,13 +39,13 @@ struct sn_response_t;
 struct blockchain_test_answer_t;
 struct bc_test_params_t;
 
-class LokidClient;
+class SispopdClient;
 
 namespace http_server {
 class connection_t;
 }
 
-struct lokid_key_pair_t;
+struct sispopd_key_pair_t;
 
 using connection_ptr = std::shared_ptr<http_server::connection_t>;
 
@@ -105,7 +105,7 @@ class ServiceNode {
     int hardfork_ = 0;
     uint64_t block_height_ = 0;
     uint64_t target_height_ = 0;
-    const LokidClient& lokid_client_;
+    const SispopdClient& sispopd_client_;
     std::string block_hash_;
     std::unique_ptr<Swarm> swarm_;
     std::unique_ptr<Database> db_;
@@ -122,7 +122,7 @@ class ServiceNode {
 
     boost::asio::steady_timer swarm_update_timer_;
 
-    boost::asio::steady_timer lokid_ping_timer_;
+    boost::asio::steady_timer sispopd_ping_timer_;
 
     boost::asio::steady_timer stats_cleanup_timer_;
 
@@ -134,8 +134,8 @@ class ServiceNode {
     /// map pubkeys to a list of connections to be notified
     std::unordered_map<pub_key_t, listeners_t> pk_to_listeners;
 
-    loki::lokid_key_pair_t lokid_key_pair_;
-    loki::lokid_key_pair_t lokid_key_pair_x25519_;
+    sispop::sispopd_key_pair_t sispopd_key_pair_;
+    sispop::sispopd_key_pair_t sispopd_key_pair_x25519_;
 
     reachability_records_t reach_records_;
 
@@ -195,7 +195,7 @@ class ServiceNode {
     void pow_difficulty_timer_tick(const pow_dns_callback_t cb);
 
     /// Ping the storage server periodically as required for uptime proofs
-    void lokid_ping_timer_tick();
+    void sispopd_ping_timer_tick();
 
     /// Return tester/testee pair based on block_height
     bool derive_tester_testee(uint64_t block_height, sn_record_t& tester,
@@ -210,7 +210,7 @@ class ServiceNode {
                                   uint64_t test_height,
                                   blockchain_test_answer_t answer);
 
-    /// Report `sn` to Lokid as unreachable
+    /// Report `sn` to Sispopd as unreachable
     void report_node_reachability(const sn_pub_key_t& sn, bool reachable);
 
     void process_storage_test_response(const sn_record_t& testee,
@@ -241,9 +241,9 @@ class ServiceNode {
   public:
     ServiceNode(boost::asio::io_context& ioc,
                 boost::asio::io_context& worker_ioc, uint16_t port,
-                const loki::lokid_key_pair_t& key_pair,
-                const loki::lokid_key_pair_t& key_pair_x25519,
-                const std::string& db_location, LokidClient& lokid_client,
+                const sispop::sispopd_key_pair_t& key_pair,
+                const sispop::sispopd_key_pair_t& key_pair_x25519,
+                const std::string& db_location, SispopdClient& sispopd_client,
                 const bool force_start);
 
     ~ServiceNode();
@@ -313,4 +313,4 @@ class ServiceNode {
     std::string get_stats() const;
 };
 
-} // namespace loki
+} // namespace sispop

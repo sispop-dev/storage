@@ -12,9 +12,9 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/thread/thread.hpp>
 
-using loki::storage::Item;
+using sispop::storage::Item;
 
-using namespace loki;
+using namespace sispop;
 
 struct StorageRAIIFixture {
     StorageRAIIFixture() {

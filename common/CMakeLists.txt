@@ -3,12 +3,12 @@ cmake_minimum_required(VERSION 3.1)
 add_definitions(-DSPDLOG_COMPILED_LIB)
 
 set(SRC_FILES
-    src/loki_logger.cpp
+    src/sispop_logger.cpp
 )
 
 set(HEADER_FILES
-    include/loki_common.h
-    include/loki_logger.h
+    include/sispop_common.h
+    include/sispop_logger.h
     include/dev_sink.h
 )
 
@@ -21,7 +21,7 @@ find_package(Boost
 
 set_property(TARGET common PROPERTY CXX_STANDARD 14)
 
-loki_add_subdirectory(../vendors/spdlog spdlog)
+sispop_add_subdirectory(../vendors/spdlog spdlog)
 
 target_link_libraries(common PUBLIC spdlog::spdlog ${Boost_LIBRARIES})
 target_include_directories(common PUBLIC

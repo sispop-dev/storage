@@ -43,17 +43,17 @@ RUN set -ex \
     && make check \
     && make install
 
-ADD https://api.github.com/repos/loki-project/loki-storage-server/git/refs/heads/master version.json
+ADD https://api.github.com/repos/sispop-project/sispop-storage-server/git/refs/heads/master version.json
 
-RUN git clone https://github.com/loki-project/loki-storage-server.git --depth=1
-RUN cd loki-storage-server && git submodule update --init
+RUN git clone https://github.com/sispop-project/sispop-storage-server.git --depth=1
+RUN cd sispop-storage-server && git submodule update --init
 
 ENV BOOST_ROOT /usr/src/app/boost_${BOOST_VERSION}
 
-RUN cd loki-storage-server \
+RUN cd sispop-storage-server \
     && mkdir -p build \
     && cd build \
     && cmake .. -DBOOST_ROOT=$BOOST_ROOT \
     && cmake --build .
 
-RUN loki-storage-server/build/httpserver/loki-storage --version 
+RUN sispop-storage-server/build/httpserver/sispop-storage --version 

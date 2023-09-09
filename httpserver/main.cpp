@@ -83,8 +83,10 @@ int main(int argc, char* argv[]) {
     }
 
     // Always print version for the logs
-    print_version();
+//    print_version();
+    SISPOP_LOG(info, "{}", STORAGE_SERVER_VERSION_INFO);
     if (options.print_version) {
+
         return EXIT_SUCCESS;
     }
 

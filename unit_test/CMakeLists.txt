@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1)
+cmake_minimum_required (VERSION 3.5)
 
 add_executable (Test
     main.cpp
@@ -10,27 +10,12 @@ add_executable (Test
     command_line.cpp
 )
 
-# library under test
-
-sispop_add_subdirectory(../common common)
-sispop_add_subdirectory(../storage storage)
-sispop_add_subdirectory(../pow pow)
-sispop_add_subdirectory(../utils utils)
-sispop_add_subdirectory(../crypto crypto)
-sispop_add_subdirectory(../httpserver httpserver)
-
 target_link_libraries(Test PRIVATE common storage pow utils crypto httpserver_lib)
+target_include_directories(Test PRIVATE ../httpserver)
 
 # boost
-find_package(Boost REQUIRED
-    system
-    filesystem
-    chrono
-    thread
-    unit_test_framework
-)
+if(NOT BUILD_STATIC_DEPS)
+  find_package(Boost REQUIRED unit_test_framework)
+endif()
 
-set_property(TARGET Test PROPERTY CXX_STANDARD 14)
-
-target_include_directories(Test PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries(Test PRIVATE ${Boost_LIBRARIES})
+target_link_libraries(Test PRIVATE Boost::unit_test_framework)

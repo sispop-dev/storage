@@ -11,13 +11,14 @@ set(OPENSSL_SOURCE openssl-${OPENSSL_VERSION}.tar.gz)
 set(OPENSSL_HASH SHA256=e8be6a35fe41d10603c3cc635e93289ed00bf34b79671a3a4de64fcee00d5242
     CACHE STRING "openssl source hash")
 
-set(BOOST_VERSION 1.75.0 CACHE STRING "boost version")
-set(BOOST_MIRROR ${LOCAL_MIRROR} https://dl.bintray.com/boostorg/release/${BOOST_VERSION}/source
+set(BOOST_VERSION 1.73.0 CACHE STRING "boost version")
+set(BOOST_MIRROR ${LOCAL_MIRROR} https://boostorg.jfrog.io/artifactory/main/release/${BOOST_VERSION}/source
     CACHE STRING "boost download mirror(s)")
 string(REPLACE "." "_" BOOST_VERSION_ ${BOOST_VERSION})
-set(BOOST_SOURCE boost_${BOOST_VERSION_}.tar.bz2)
-set(BOOST_HASH SHA256=953db31e016db7bb207f11432bef7df100516eeb746843fa0486a222e3fd49cb
+set(BOOST_SOURCE boost_${BOOST_VERSION_}.tar.gz)
+set(BOOST_HASH SHA256=9995e192e68528793755692917f9eb6422f3052a53c5e13ba278a228af6c7acf
     CACHE STRING "boost source hash")
+
 
 set(SODIUM_VERSION 1.0.18 CACHE STRING "libsodium version")
 set(SODIUM_MIRROR ${LOCAL_MIRROR}

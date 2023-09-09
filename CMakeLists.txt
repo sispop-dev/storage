@@ -84,7 +84,7 @@ add_subdirectory(pow)
 add_subdirectory(storage)
 add_subdirectory(httpserver)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "disable shared libraries")
-add_subdirectory(vendors/spdlog)
+
 
 if (BUILD_TESTS)
     add_subdirectory(unit_test)

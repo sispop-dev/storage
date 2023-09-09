@@ -1,12 +1,16 @@
 #include "channel_encryption.hpp"
 
-#include <boost/algorithm/hex.hpp>
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <sodium.h>
+#include <boost/algorithm/hex.hpp>
+
+#include "utils.hpp"
 
 #include <exception>
 #include <string>
+
+#include <iostream>
 
 std::vector<uint8_t> hexToBytes(const std::string& hex) {
     std::vector<uint8_t> temp;

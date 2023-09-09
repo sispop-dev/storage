@@ -15,9 +15,6 @@ add_library(httpserver_lib STATIC
     security.cpp
     command_line.cpp
     reachability_testing.cpp
-    lmq_server.cpp
-    request_handler.cpp
-    onion_processing.cpp
     )
 
 
@@ -27,7 +24,6 @@ target_compile_options(httpserver_lib PRIVATE -Werror=return-type)
 target_link_libraries(httpserver_lib PUBLIC
     common storage utils pow crypto
     OpenSSL::SSL OpenSSL::Crypto
-    nlohmann_json::nlohmann_json
     Boost::system Boost::program_options)
 
 # libresolv is needed on linux, but not on BSDs, so only link it if we can find it
@@ -36,7 +32,7 @@ if(RESOLV)
     target_link_libraries(httpserver_lib PUBLIC ${RESOLV})
 endif()
 
-set(BIN_NAME oxen-storage)
+set(BIN_NAME sispop-storage)
 
 add_executable(httpserver main.cpp)
 target_compile_options(httpserver PRIVATE -Wall -Wextra -Werror)

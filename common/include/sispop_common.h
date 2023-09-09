@@ -1,7 +1,7 @@
 #pragma once
 
 #include "spdlog/fmt/ostr.h" // for operator<< overload
-
+#include <chrono>
 #include <cstdint>
 #include <ostream>
 #include <string>

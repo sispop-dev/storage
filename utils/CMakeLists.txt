@@ -7,11 +7,6 @@ set(SOURCES
     src/utils.cpp
 )
 
-find_package(Boost
-    REQUIRED
-    filesystem
-)
-
 add_library(utils STATIC ${SOURCES})
 
 set_property(TARGET utils PROPERTY CXX_STANDARD 14)

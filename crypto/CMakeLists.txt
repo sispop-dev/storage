@@ -10,26 +10,25 @@ add_library(crypto STATIC
     ${CMAKE_CURRENT_LIST_DIR}/../vendors/sispop/crypto-ops/hash-ops.c
 )
 
-target_link_libraries(crypto PRIVATE OpenSSL::SSL)
 
 target_include_directories(crypto
     PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/include
     PRIVATE
+    OpenSSL::SSL
     ${CMAKE_CURRENT_LIST_DIR}/../vendors
 )
 
 target_link_libraries(crypto PUBLIC utils)
 
-add_executable(crypto_test src/test_main.cpp)
-target_link_libraries(crypto_test PRIVATE crypto)
+#add_executable(crypto_test src/test_main.cpp)
+#target_link_libraries(crypto_test  PRIVATE crypto)
 
 find_package(Threads)
 
 target_link_libraries(crypto PRIVATE
     sodium
     Boost::boost
-    lokimq::lokimq
     filesystem
     Threads::Threads
     ${CMAKE_DL_LIBS})

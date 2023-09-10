@@ -40,7 +40,7 @@ if(RESOLV)
     target_link_libraries(httpserver_lib PUBLIC ${RESOLV})
 endif()
 
-set(BIN_NAME oxen-storage)
+set(BIN_NAME sispophttpserver/CMakeLists.txt-storage)
 
 add_executable(httpserver main.cpp)
 target_compile_options(httpserver PRIVATE -Wall -Wextra -Werror)

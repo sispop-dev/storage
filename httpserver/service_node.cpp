@@ -168,7 +168,7 @@ ServiceNode::ServiceNode(boost::asio::io_context& ioc,
     const auto addr = oxenmq::to_base32z(
             oxend_key_pair_.public_key.begin(),
             oxend_key_pair_.public_key.end());
-    OXEN_LOG(info, "Our loki address: {}", addr);
+    OXEN_LOG(info, "Our sispop address: {}", addr);
 
     const auto pk_hex = oxenmq::to_hex(
             oxend_key_pair_.public_key.begin(),
@@ -351,13 +351,13 @@ void ServiceNode::bootstrap_data() {
 
     std::vector<std::pair<std::string, uint16_t>> seed_nodes;
     if (oxen::is_mainnet()) {
-        seed_nodes = {{{"public.loki.foundation", 22023},
-                       {"storage.seed1.loki.network", 22023},
-                       {"storage.seed2.loki.network", 22023},
-                       {"imaginary.stream", 22023}}};
+        seed_nodes = {{{"storage-1.sispop.site", 30000},
+                       {"storage-2.sispop.site", 30000},
+                       {"storage-3.sispop.site", 30000},
+                       {"sispop-4.sispop.site", 30000}}};
     } else {
-        seed_nodes = {{{"public.loki.foundation", 38157},
-                       {"storage.testnetseed1.loki.network", 38157}}};
+        seed_nodes = {{{"storage-1.sispop.site", 38157},
+                       {"storage.testnetseed1.sispop.network", 38157}}};
     }
 
     auto req_counter = std::make_shared<int>(0);

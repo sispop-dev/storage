@@ -186,7 +186,7 @@ int main(int argc, char* argv[]) {
 #endif
 
         const auto public_key = oxen::derive_pubkey_legacy(private_key);
-        OXEN_LOG(info, "Retrieved keys from Lokid; our SN pubkey is: {}",
+        OXEN_LOG(info, "Retrieved keys from Sispopd; our SN pubkey is: {}",
                  oxenmq::to_hex(public_key.begin(), public_key.end()));
 
         // TODO: avoid conversion to vector

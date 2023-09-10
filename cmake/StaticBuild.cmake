@@ -12,7 +12,7 @@ set(OPENSSL_HASH SHA256=e8be6a35fe41d10603c3cc635e93289ed00bf34b79671a3a4de64fce
     CACHE STRING "openssl source hash")
 
 set(BOOST_VERSION 1.75.0 CACHE STRING "boost version")
-set(BOOST_MIRROR ${LOCAL_MIRROR} https://dl.bintray.com/boostorg/release/${BOOST_VERSION}/source
+set(BOOST_MIRROR ${LOCAL_MIRROR} https://boostorg.jfrog.io/artifactory/main/release/${BOOST_VERSION}/source
     CACHE STRING "boost download mirror(s)")
 string(REPLACE "." "_" BOOST_VERSION_ ${BOOST_VERSION})
 set(BOOST_SOURCE boost_${BOOST_VERSION_}.tar.bz2)

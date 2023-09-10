@@ -36,10 +36,10 @@ namespace http = boost::beast::http; // from <boost/beast/http.hpp>
 /// +===========================================
 
 static constexpr auto OXEN_FILE_SERVER_TARGET_HEADER =
-    "X-Loki-File-Server-Target";
-static constexpr auto OXEN_FILE_SERVER_VERB_HEADER = "X-Loki-File-Server-Verb";
+    "X-Sispop-File-Server-Target";
+static constexpr auto OXEN_FILE_SERVER_VERB_HEADER = "X-Sispop-File-Server-Verb";
 static constexpr auto OXEN_FILE_SERVER_HEADERS_HEADER =
-    "X-Loki-File-Server-Headers";
+    "X-Sispop-File-Server-Headers";
 
 using oxen::storage::Item;
 
@@ -797,7 +797,7 @@ void connection_t::process_file_proxy_req() {
 
     req->body() = std::move(original_req.body());
     req->target(target);
-    req->set(http::field::host, "file.lokinet.org");
+    req->set(http::field::host, "file.sispop.site");
 
     req->prepare_payload();
 
@@ -826,7 +826,7 @@ void connection_t::process_file_proxy_req() {
         self->write_response();
     };
 
-    make_https_request(ioc_, "https://file.lokinet.org", req, cb);
+    make_https_request(ioc_, "https://file.sispopnet.org", req, cb);
 }
 
 void connection_t::process_swarm_req(std::string_view target) {

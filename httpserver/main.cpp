@@ -85,9 +85,9 @@ int main(int argc, char* argv[]) {
         if (auto home_dir = get_home_dir()) {
             if (options.testnet) {
                 options.data_dir =
-                    (*home_dir / ".oxen" / "testnet" / "storage").string();
+                    (*home_dir / ".sispop" / "testnet" / "storage").string();
             } else {
-                options.data_dir = (*home_dir / ".oxen" / "storage").string();
+                options.data_dir = (*home_dir / ".sispop" / "storage").string();
             }
         }
     }
@@ -116,24 +116,24 @@ int main(int argc, char* argv[]) {
 
     if (options.ip == "127.0.0.1") {
         OXEN_LOG(critical,
-                 "Tried to bind oxen-storage to localhost, please bind "
+                 "Tried to bind sispop-storage to localhost, please bind "
                  "to outward facing address");
         return EXIT_FAILURE;
     }
 
     if (options.port == options.oxend_rpc_port) {
         OXEN_LOG(error, "Storage server port must be different from that of "
-                        "Oxend! Terminating.");
+                        "Sispopd! Terminating.");
         exit(EXIT_INVALID_PORT);
     }
 
     OXEN_LOG(info, "Setting log level to {}", options.log_level);
     OXEN_LOG(info, "Setting database location to {}", options.data_dir);
-    OXEN_LOG(info, "Setting Oxend RPC to {}:{}", options.oxend_rpc_ip,
+    OXEN_LOG(info, "Setting Sispopd RPC to {}:{}", options.oxend_rpc_ip,
              options.oxend_rpc_port);
     OXEN_LOG(info, "Https server is listening at {}:{}", options.ip,
              options.port);
-    OXEN_LOG(info, "OxenMQ is listening at {}:{}", options.ip,
+    OXEN_LOG(info, "SispopMQ is listening at {}:{}", options.ip,
              options.lmq_port);
 
     boost::asio::io_context ioc{1};
@@ -174,7 +174,7 @@ int main(int argc, char* argv[]) {
             oxend_client.wait_for_privkey();
 #else
         private_key = oxen::oxendKeyFromHex(options.oxend_key);
-        OXEN_LOG(info, "OXEND LEGACY KEY: {}", options.oxend_key);
+        OXEN_LOG(info, "SispopD LEGACY KEY: {}", options.oxend_key);
 
         private_key_x25519 = oxen::oxendKeyFromHex(options.oxend_x25519_key);
         OXEN_LOG(info, "x25519 SECRET KEY: {}", options.oxend_x25519_key);

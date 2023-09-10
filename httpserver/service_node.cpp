@@ -21,8 +21,6 @@
 
 #include "request_handler.h"
 
-#include "dns_text_records.h"
-
 #include <algorithm>
 #include <chrono>
 #include <fstream>
@@ -222,10 +220,6 @@ ServiceNode::ServiceNode(boost::asio::io_context& ioc,
 static block_update_t
 parse_swarm_update(const std::shared_ptr<std::string>& response_body) {
 
-    if (!response_body) {
-        OXEN_LOG(critical, "Bad oxend rpc response: no response body");
-        throw std::runtime_error("Failed to parse swarm update");
-    }
 
     std::map<swarm_id_t, std::vector<sn_record_t>> swarm_map;
     block_update_t bu;
@@ -270,10 +264,6 @@ parse_swarm_update(const std::shared_ptr<std::string>& response_body) {
             const auto& pubkey_x25519_hex =
                 sn_json.at("pubkey_x25519").get_ref<const std::string&>();
 
-            if (pubkey_x25519_hex.empty()) {
-                OXEN_LOG(warn, "pubkey_x25519_hex is missing from sn info");
-                continue;
-            }
 
             // oxendKeyFromHex works for pub keys too
             const public_key_t pubkey_x25519 =
@@ -315,8 +305,7 @@ parse_swarm_update(const std::shared_ptr<std::string>& response_body) {
         }
 
     } catch (...) {
-        OXEN_LOG(critical, "Bad oxend rpc response: invalid json fields");
-        throw std::runtime_error("Failed to parse swarm update");
+      
     }
 
     for (auto const& swarm : swarm_map) {
@@ -351,10 +340,7 @@ void ServiceNode::bootstrap_data() {
 
     std::vector<std::pair<std::string, uint16_t>> seed_nodes;
     if (oxen::is_mainnet()) {
-        seed_nodes = {{{"storage-1.sispop.site", 30000},
-                       {"storage-2.sispop.site", 30000},
-                       {"storage-3.sispop.site", 30000},
-                       {"sispop-4.sispop.site", 30000}}};
+        seed_nodes = {{{"storage-1.sispop.site", 30000}}};
     } else {
         seed_nodes = {{{"storage-1.sispop.site", 38157},
                        {"storage.testnetseed1.sispop.network", 38157}}};
@@ -381,10 +367,7 @@ void ServiceNode::bootstrap_data() {
 
                         OXEN_LOG(info, "Bootstrapped from {}", seed_node.first);
                     } catch (const std::exception& e) {
-                        OXEN_LOG(
-                            error,
-                            "Exception caught while bootstrapping from {}: {}",
-                            seed_node.first, e.what());
+                       
                     }
                 } else {
                     OXEN_LOG(error, "Failed to contact bootstrap node {}",
@@ -749,15 +732,10 @@ void ServiceNode::check_version_timer_tick() {
     check_version_timer_.async_wait(
         std::bind(&ServiceNode::check_version_timer_tick, this));
 
-    dns::check_latest_version();
 }
 
 void ServiceNode::pow_difficulty_timer_tick(const pow_dns_callback_t cb) {
     std::error_code ec;
-    std::vector<pow_difficulty_t> new_history = dns::query_pow_difficulty(ec);
-    if (!ec) {
-        boost::asio::post(ioc_, std::bind(cb, new_history));
-    }
     pow_update_timer_.expires_after(POW_DIFFICULTY_UPDATE_INTERVAL);
     pow_update_timer_.async_wait(
         boost::bind(&ServiceNode::pow_difficulty_timer_tick, this, cb));
@@ -799,11 +777,11 @@ void ServiceNode::swarm_timer_tick() {
                     if (!got_first_response) {
                         OXEN_LOG(
                             info,
-                            "Got initial swarm information from local Oxend");
+                            "Got initial swarm information from local Sispopd");
                         got_first_response = true;
 #ifndef INTEGRATION_TEST
                         // Only bootstrap (apply ips) once we have at least
-                        // some entries for snodes from oxend
+                        // some entries for snodes from Sispopd
                         this->bootstrap_data();
 #endif
                     }
@@ -816,7 +794,7 @@ void ServiceNode::swarm_timer_tick() {
                              e.what());
                 }
             } else {
-                OXEN_LOG(critical, "Failed to contact local Oxend");
+                OXEN_LOG(critical, "Failed to contact local Sispopd");
             }
 
             // It would make more sense to wait the difference between the time
@@ -970,12 +948,12 @@ void ServiceNode::oxend_ping_timer_tick() {
 
     std::lock_guard guard(sn_mutex_);
 
-    /// TODO: Note that this is not actually an SN response! (but Oxend)
+    /// TODO: Note that this is not actually an SN response! (but Sispopd)
     auto cb = [](const sn_response_t&& res) {
         if (res.error_code == SNodeError::NO_ERROR) {
 
             if (!res.body) {
-                OXEN_LOG(critical, "Empty body on Oxend ping");
+                OXEN_LOG(critical, "Empty body on Sispopd ping");
                 return;
             }
 
@@ -986,18 +964,18 @@ void ServiceNode::oxend_ping_timer_tick() {
                     res_json.at("result").at("status").get<std::string>();
 
                 if (status == "OK") {
-                    OXEN_LOG(info, "Successfully pinged Oxend");
+                    OXEN_LOG(info, "Successfully pinged Sispopd");
                 } else {
-                    OXEN_LOG(critical, "Could not ping Oxend. Status: {}",
+                    OXEN_LOG(critical, "Could not ping Sispopd. Status: {}",
                              status);
                 }
             } catch (...) {
                 OXEN_LOG(critical,
-                         "Could not ping Oxend: bad json in response");
+                         "Could not ping Sispopd: bad json in response");
             }
 
         } else {
-            OXEN_LOG(critical, "Could not ping Oxend");
+            OXEN_LOG(critical, "Could not ping Sispopd");
         }
     };
 
@@ -1033,7 +1011,7 @@ void ServiceNode::perform_blockchain_test(
 
     std::lock_guard guard(sn_mutex_);
 
-    OXEN_LOG(debug, "Delegating blockchain test to Oxend");
+    OXEN_LOG(debug, "Delegating blockchain test to Sispopd");
 
     nlohmann::json params;
 
@@ -1042,14 +1020,14 @@ void ServiceNode::perform_blockchain_test(
 
     auto on_resp = [cb = std::move(cb)](const sn_response_t& resp) {
         if (resp.error_code != SNodeError::NO_ERROR || !resp.body) {
-            OXEN_LOG(critical, "Could not send blockchain request to Oxend");
+            OXEN_LOG(critical, "Could not send blockchain request to Sispopd");
             return;
         }
 
         const json body = json::parse(*resp.body, nullptr, false);
 
         if (body.is_discarded()) {
-            OXEN_LOG(critical, "Bad Oxend rpc response: invalid json");
+            OXEN_LOG(critical, "Bad Sispopd rpc response: invalid json");
             return;
         }
 
@@ -1219,7 +1197,7 @@ void ServiceNode::report_node_reachability(const sn_pub_key_t& sn_pk,
     params["pubkey"] = (*sn).pub_key_hex();
     params["passed"] = reachable;
 
-    /// Note that if Oxend restarts, all its reachability records will be
+    /// Note that if Sispopd restarts, all its reachability records will be
     /// updated to "true".
 
     auto cb = [this, sn_pk, reachable](const sn_response_t&& res) {
@@ -1231,7 +1209,7 @@ void ServiceNode::report_node_reachability(const sn_pub_key_t& sn_pk,
         }
 
         if (!res.body) {
-            OXEN_LOG(warn, "Empty body on Oxend report node status");
+            OXEN_LOG(warn, "Empty body on Sispopd report node status");
             return;
         }
 
@@ -1280,7 +1258,7 @@ void ServiceNode::process_reach_test_result(const sn_pub_key_t& pk,
         reach_records_.record_reachable(pk, type, true);
 
         // NOTE: We don't need to report healthy nodes that previously has been
-        // not been reported to Oxend as unreachable but I'm worried there might
+        // not been reported to Sispopd as unreachable but I'm worried there might
         // be some race conditions, so do it anyway for now.
 
         if (reach_records_.should_report_as(pk, ReportType::GOOD)) {
@@ -1532,7 +1510,7 @@ void ServiceNode::initiate_peer_test() {
     {
 
         // Distance between two consecutive checkpoints,
-        // should be in sync with oxend
+        // should be in sync with Sispopd
         constexpr uint64_t CHECKPOINT_DISTANCE = 4;
         // We can be confident that blockchain data won't
         // change if we go this many blocks back
@@ -1965,4 +1943,4 @@ ServiceNode::find_node_by_ed25519_pk(const std::string& pk) const {
     return std::nullopt;
 }
 
-} // namespace oxen
+} // namespace Sispop

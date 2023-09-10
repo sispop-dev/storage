@@ -14,7 +14,6 @@ add_library(httpserver_lib STATIC
     stats.cpp
     security.cpp
     command_line.cpp
-    dns_text_records.cpp
     reachability_testing.cpp
     lmq_server.cpp
     request_handler.cpp
@@ -40,7 +39,7 @@ if(RESOLV)
     target_link_libraries(httpserver_lib PUBLIC ${RESOLV})
 endif()
 
-set(BIN_NAME sispophttpserver/CMakeLists.txt-storage)
+set(BIN_NAME sispop-storage)
 
 add_executable(httpserver main.cpp)
 target_compile_options(httpserver PRIVATE -Wall -Wextra -Werror)

@@ -70,13 +70,6 @@ void make_http_request(boost::asio::io_context& ioc, const std::string& address,
 
     tcp::resolver::iterator destination = resolver.resolve(address, "http", ec);
 
-    if (ec) {
-        OXEN_LOG(error,
-                 "http: Failed to parse the IP address <{}>. Error code = {}. "
-                 "Message: {}",
-                 address, ec.value(), ec.message());
-        return;
-    }
     while (destination != tcp::resolver::iterator()) {
         const tcp::endpoint thisEndpoint = (destination++)->endpoint();
         if (!thisEndpoint.address().is_v4()) {
@@ -126,7 +119,7 @@ void OxendClient::make_custom_oxend_request(const std::string& daemon_ip,
     req->target(target);
     req->prepare_payload();
 
-    OXEN_LOG(trace, "Making oxend request, method: {}", std::string(method));
+    OXEN_LOG(trace, "Making sispopd request, method: {}", std::string(method));
 
     make_http_request(ioc_, daemon_ip, daemon_port, req, std::move(cb));
 }
@@ -146,7 +139,7 @@ OxendClient::wait_for_privkey() {
     oxen::private_key_t private_key;
     oxen::private_key_ed25519_t private_key_ed;
     oxen::private_key_t private_key_x;
-    OXEN_LOG(info, "Retrieving SN key from oxend");
+    OXEN_LOG(info, "Retrieving SN key from sispopd");
     boost::asio::steady_timer delay{ioc_};
     std::function<void(oxen::sn_response_t && res)> key_fetch;
     key_fetch = [&](oxen::sn_response_t res) {
@@ -183,8 +176,8 @@ OxendClient::wait_for_privkey() {
             }
         } catch (const std::exception& e) {
             OXEN_LOG(critical,
-                     "Error retrieving SN privkey from oxend @ {}:{}: {}.  Is "
-                     "oxend running?  Retrying in 5s",
+                     "Error retrieving SN privkey from sispopd @ {}:{}: {}.  Is "
+                     "sispopd running?  Retrying in 5s",
                      oxend_rpc_ip_, oxend_rpc_port_, e.what());
 
             delay.expires_after(std::chrono::seconds{5});

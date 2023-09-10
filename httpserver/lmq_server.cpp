@@ -96,7 +96,7 @@ void OxenmqServer::handle_sn_proxy_exit(oxenmq::Message& message) {
 
 void OxenmqServer::handle_onion_request(oxenmq::Message& message, bool v2) {
 
-    OXEN_LOG(debug, "Got an onion request over OXENMQ");
+    OXEN_LOG(debug, "Got an onion request over SispopMQ");
 
     auto& reply_tag = message.reply_tag;
     auto& origin_pk = message.conn.pubkey();
@@ -204,7 +204,7 @@ void OxenmqServer::init(ServiceNode* sn, RequestHandler* rh,
     oxenmq_.reset(new OxenMQ{pubkey, seckey, true /* is service node */,
                              lookup_fn, logger});
 
-    OXEN_LOG(info, "OxenMQ is listenting on port {}", port_);
+    OXEN_LOG(info, "SispopMQ is listenting on port {}", port_);
 
     oxenmq_->log_level(oxenmq::LogLevel::info);
     // clang-format off

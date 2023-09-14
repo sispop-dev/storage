@@ -24,8 +24,16 @@ target_compile_options(httpserver_lib PRIVATE -Werror=return-type)
 target_link_libraries(httpserver_lib PUBLIC
     common storage utils pow crypto
     OpenSSL::SSL OpenSSL::Crypto
-    Boost::system Boost::program_options)
+    Boost::system Boost::program_options Boost::filesystem Boost::thread
+)
 
+#find_package(Boost
+#    REQUIRED
+#    thread
+#    system
+#    filesystem
+#    program_options
+#)
 # libresolv is needed on linux, but not on BSDs, so only link it if we can find it
 find_library(RESOLV resolv)
 if(RESOLV)
@@ -35,7 +43,7 @@ endif()
 set(BIN_NAME sispop-storage)
 
 add_executable(httpserver main.cpp)
-target_compile_options(httpserver PRIVATE -Wall -Wextra -Werror)
+target_compile_options(httpserver PRIVATE -Wall -Wextra)
 set_target_properties(httpserver PROPERTIES OUTPUT_NAME ${BIN_NAME})
 target_link_libraries(httpserver PRIVATE httpserver_lib)
 install(TARGETS httpserver DESTINATION bin)

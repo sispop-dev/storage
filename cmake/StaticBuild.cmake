@@ -11,12 +11,12 @@ set(OPENSSL_SOURCE openssl-${OPENSSL_VERSION}.tar.gz)
 set(OPENSSL_HASH SHA256=e8be6a35fe41d10603c3cc635e93289ed00bf34b79671a3a4de64fcee00d5242
     CACHE STRING "openssl source hash")
 
-set(BOOST_VERSION 1.73.0 CACHE STRING "boost version")
+set(BOOST_VERSION 1.67.0 CACHE STRING "boost version")
 set(BOOST_MIRROR ${LOCAL_MIRROR} https://boostorg.jfrog.io/artifactory/main/release/${BOOST_VERSION}/source
     CACHE STRING "boost download mirror(s)")
 string(REPLACE "." "_" BOOST_VERSION_ ${BOOST_VERSION})
 set(BOOST_SOURCE boost_${BOOST_VERSION_}.tar.gz)
-set(BOOST_HASH SHA256=9995e192e68528793755692917f9eb6422f3052a53c5e13ba278a228af6c7acf
+set(BOOST_HASH SHA256=8aa4e330c870ef50a896634c931adf468b21f8a69b77007e45c444151229f665
     CACHE STRING "boost source hash")
 
 
@@ -218,7 +218,7 @@ if(APPLE AND CMAKE_OSX_DEPLOYMENT_TARGET)
   string(APPEND boost_buildflags " -mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}" "cflags=-mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
 endif()
 
-set(boost_libs program_options system)
+set(boost_libs program_options system thread filesystem)
 if(BUILD_TESTS)
     list(APPEND boost_libs unit_test_framework)
 endif()
@@ -232,13 +232,10 @@ build_external(boost
   #  PATCH_COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/user-config.bjam tools/build/src/user-config.jam
   CONFIGURE_COMMAND
     ${CMAKE_COMMAND} -E env ${boost_bootstrap_cxx}
-    ./bootstrap.sh --without-icu --prefix=${DEPS_DESTDIR} --with-toolset=${boost_toolset}
-      --with-libraries=${boost_with_libraries}
+    ./bootstrap.sh
   BUILD_COMMAND true
   INSTALL_COMMAND
-    ./b2 -d0 variant=release link=static runtime-link=static optimization=speed ${boost_extra}
-      threading=multi threadapi=${boost_threadapi} ${boost_buildflags} cxxstd=14 visibility=global
-      --disable-icu --user-config=${CMAKE_CURRENT_BINARY_DIR}/user-config.bjam
+    ./b2 -a -d0 --prefix=${DEPS_DESTDIR} link=static variant=release install --with-program_options --with-filesystem --with-system --with-chrono --with-thread --with-log --with-test
       install
   BUILD_BYPRODUCTS
     ${boost_static_libraries}

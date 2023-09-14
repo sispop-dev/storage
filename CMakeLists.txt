@@ -24,6 +24,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)
 
+add_compile_options("-Wno-reorder")
+
 cmake_policy(SET CMP0069 NEW) # Do LTO properly
 set(CMAKE_POLICY_DEFAULT_CMP0069 NEW)
 option(USE_LTO "Use Link-Time Optimization" ON)

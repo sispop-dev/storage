@@ -10,14 +10,12 @@ Requirements:
 git submodule update --init
 mkdir build && cd build
 cmake -DDISABLE_SNODE_SIGNATURE=OFF -DCMAKE_BUILD_TYPE=Release ..
-cmake --build .
-./sispop-storage 0.0.0.0 8080
+make && sudo make install
+
+sispop-storage 0.0.0.0 --sispopd-rpc-port=30000
 ```
 
-The paths for Boost and OpenSSL can be specified by exporting the variables in the terminal before running `make`:
-```
-export OPENSSL_ROOT_DIR = ...
-export BOOST_ROOT= ...
+
 ```
 
 Then using something like Postman (https://www.getpostman.com/) you can hit the API:

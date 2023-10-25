@@ -19,15 +19,15 @@ set(BOOST_SOURCE boost_${BOOST_VERSION_}.tar.gz)
 set(BOOST_HASH SHA256=8aa4e330c870ef50a896634c931adf468b21f8a69b77007e45c444151229f665
     CACHE STRING "boost source hash")
 
-
-set(SODIUM_VERSION 1.0.18 CACHE STRING "libsodium version")
+set(SODIUM_VERSION 1.0.19 CACHE STRING "libsodium version")
 set(SODIUM_MIRROR ${LOCAL_MIRROR}
   https://download.libsodium.org/libsodium/releases
   https://github.com/jedisct1/libsodium/releases/download/${SODIUM_VERSION}-RELEASE
   CACHE STRING "libsodium mirror(s)")
 set(SODIUM_SOURCE libsodium-${SODIUM_VERSION}.tar.gz)
-set(SODIUM_HASH SHA512=17e8638e46d8f6f7d024fe5559eccf2b8baf23e143fadd472a7d29d228b186d86686a5e6920385fe2020729119a5f12f989c3a782afbd05a8db4819bb18666ef
+set(SODIUM_HASH SHA512=8e9b6d796f6330e00921ce37f1b43545966094250938626ae227deef5fd1279f2fc18b5cd55e23484732a27df4d919cf0d2f07b9c2f1aa0c0ef689e668b0d439
   CACHE STRING "libsodium source hash")
+
 
 set(SQLITE3_VERSION 3340000 CACHE STRING "sqlite3 version")
 set(SQLITE3_MIRROR ${LOCAL_MIRROR} https://www.sqlite.org/2020

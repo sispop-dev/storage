@@ -19,10 +19,10 @@ add_library(httpserver_lib STATIC
 
 
 # TODO: enable more warnings!
-target_compile_options(httpserver_lib PRIVATE -Werror=return-type)
+target_compile_options(httpserver_lib PRIVATE -Wall -Werror)
 
 target_link_libraries(httpserver_lib PUBLIC
-    common storage utils pow crypto
+    common storage utils crypto
     OpenSSL::SSL OpenSSL::Crypto
     Boost::system Boost::program_options Boost::filesystem Boost::thread
 )

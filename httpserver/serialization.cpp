@@ -173,18 +173,16 @@ std::vector<message_t> deserialize_messages(const std::string& blob) {
             return {};
         }
 
-        /// Deserialize Nonce
-        auto nonce = deserialize_string(slice);
-        if (!nonce) {
-            SISPOP_LOG(debug, "Could not deserialize nonce");
-            return {};
-        }
+        /// TODO: Nonce is unused. We don't strictly need to call this, but
+        /// I'm leaving this to be explicit about what is in the protocol.
+        /// If possible, would be good to remove it from the protocol.
+        auto unused_nonce = deserialize_string(slice);
 
         SISPOP_LOG(trace, "Deserialized data: {}", *data);
 
         SISPOP_LOG(trace, "pk: {}, msg: {}", *pk, *data);
 
-        result.push_back({*pk, *data, *hash, *ttl, *timestamp, *nonce});
+        result.emplace_back(*pk, *data, *hash, *ttl, *timestamp);
     }
 
     SISPOP_LOG(trace, "=== END ===");

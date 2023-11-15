@@ -3,14 +3,13 @@ cmake_minimum_required (VERSION 3.5)
 add_executable (Test
     main.cpp
     storage.cpp
-    pow.cpp
     serialization.cpp
     signature.cpp
     rate_limiter.cpp
     command_line.cpp
 )
 
-target_link_libraries(Test PRIVATE common storage pow utils crypto httpserver_lib)
+target_link_libraries(Test PRIVATE common storage utils crypto httpserver_lib)
 target_include_directories(Test PRIVATE ../httpserver)
 
 # boost

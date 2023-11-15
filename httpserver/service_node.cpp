@@ -100,45 +100,10 @@ constexpr std::chrono::milliseconds SWARM_UPDATE_INTERVAL = 1000ms;
 constexpr std::chrono::seconds STATS_CLEANUP_INTERVAL = 60min;
 constexpr std::chrono::seconds PING_PEERS_INTERVAL = 10s;
 constexpr std::chrono::minutes SISPOPD_PING_INTERVAL = 5min;
-constexpr std::chrono::minutes POW_DIFFICULTY_UPDATE_INTERVAL = 10min;
 constexpr std::chrono::seconds VERSION_CHECK_INTERVAL = 10min;
 constexpr int CLIENT_RETRIEVE_MESSAGE_LIMIT = 10;
-
 static std::shared_ptr<request_t> make_push_all_request(std::string&& data) {
     return build_post_request("/swarms/push_batch/v1", std::move(data));
-}
-
-static bool verify_message(const message_t& msg,
-                           const std::vector<pow_difficulty_t> history,
-                           const char** error_message = nullptr) {
-    if (!util::validateTTL(msg.ttl)) {
-        if (error_message)
-            *error_message = "Provided TTL is not valid";
-        return false;
-    }
-    if (!util::validateTimestamp(msg.timestamp, msg.ttl)) {
-        if (error_message)
-            *error_message = "Provided timestamp is not valid";
-        return false;
-    }
-    std::string hash;
-#ifndef DISABLE_POW
-    const int difficulty =
-        get_valid_difficulty(std::to_string(msg.timestamp), history);
-    if (!checkPoW(msg.nonce, std::to_string(msg.timestamp),
-                  std::to_string(msg.ttl), msg.pub_key, msg.data, hash,
-                  difficulty)) {
-        if (error_message)
-            *error_message = "Provided PoW nonce is not valid";
-        return false;
-    }
-#endif
-    if (hash != msg.hash) {
-        if (error_message)
-            *error_message = "Incorrect hash provided";
-        return false;
-    }
-    return true;
 }
 
 ServiceNode::ServiceNode(boost::asio::io_context& ioc,
@@ -150,7 +115,7 @@ ServiceNode::ServiceNode(boost::asio::io_context& ioc,
     : ioc_(ioc), worker_ioc_(worker_ioc),
       db_(std::make_unique<Database>(ioc, db_location)),
       swarm_update_timer_(ioc), sispopd_ping_timer_(ioc),
-      stats_cleanup_timer_(ioc), pow_update_timer_(worker_ioc),
+      stats_cleanup_timer_(ioc),
       check_version_timer_(worker_ioc), peer_ping_timer_(ioc),
       relay_timer_(ioc), sispopd_key_pair_(sispopd_key_pair),
       sispopd_key_pair_x25519_(key_pair_x25519), sispopd_client_(sispopd_client),
@@ -187,12 +152,6 @@ ServiceNode::ServiceNode(boost::asio::io_context& ioc,
     cleanup_timer_tick();
 
     ping_peers_tick();
-
-    worker_thread_ = boost::thread([this]() { worker_ioc_.run(); });
-    boost::asio::post(worker_ioc_, [this]() {
-        pow_difficulty_timer_tick(std::bind(
-            &ServiceNode::set_difficulty_history, this, std::placeholders::_1));
-    });
 
     boost::asio::post(worker_ioc_,
                       [this]() { this->check_version_timer_tick(); });
@@ -287,12 +246,15 @@ void ServiceNode::bootstrap_data() {
 
     std::vector<std::pair<std::string, uint16_t>> seed_nodes;
     if (sispop::is_mainnet()) {
-        seed_nodes = {{{"storage-1.sispop.site", 30000}}};
+        seed_nodes = {{{"storage-1.sispop.site", 30000},
+                       {"storage-2.sispop.site", 30000},
+                       {"storage-3.sispop.site", 30000},
+                       {"storage-4.sispop.site", 30000}}};
     } else {
         seed_nodes = {{{"storage.testnetseed1.sispop.network", 38157}}};
     }
 
-    auto req_counter = std::make_shared<int>(0);
+    auto req_counter = std::make_shared<size_t>(0);
 
     for (auto seed_node : seed_nodes) {
         sispopd_client_.make_custom_sispopd_request(
@@ -355,11 +317,7 @@ bool ServiceNode::snode_ready(boost::optional<std::string&> reason) {
 
     return ready || force_start_;
 }
-
-ServiceNode::~ServiceNode() {
-    worker_ioc_.stop();
-    worker_thread_.join();
-};
+ServiceNode::~ServiceNode() { worker_ioc_.stop(); };
 
 void ServiceNode::relay_data_reliable(const std::shared_ptr<request_t>& req,
                                       const sn_record_t& sn) const {
@@ -499,11 +457,6 @@ bool ServiceNode::process_store(const message_t& msg) {
 }
 
 void ServiceNode::process_push(const message_t& msg) {
-#ifndef DISABLE_POW
-    const char* error_msg;
-    if (!verify_message(msg, pow_history_, &error_msg))
-        throw std::runtime_error(error_msg);
-#endif
     save_if_new(msg);
 }
 
@@ -668,12 +621,6 @@ void ServiceNode::check_version_timer_tick() {
 
 }
 
-void ServiceNode::pow_difficulty_timer_tick(const pow_dns_callback_t cb) {
-    std::error_code ec;
-    pow_update_timer_.expires_after(POW_DIFFICULTY_UPDATE_INTERVAL);
-    pow_update_timer_.async_wait(
-        boost::bind(&ServiceNode::pow_difficulty_timer_tick, this, cb));
-}
 
 void ServiceNode::swarm_timer_tick() {
     SISPOP_LOG(trace, "Swarm timer tick");
@@ -1522,17 +1469,6 @@ bool ServiceNode::retrieve(const std::string& pubKey,
                          CLIENT_RETRIEVE_MESSAGE_LIMIT);
 }
 
-void ServiceNode::set_difficulty_history(
-    const std::vector<pow_difficulty_t>& new_history) {
-    pow_history_ = new_history;
-    for (const auto& difficulty : pow_history_) {
-        if (curr_pow_difficulty_.timestamp < difficulty.timestamp) {
-            curr_pow_difficulty_ = difficulty;
-        }
-    }
-    SISPOP_LOG(info, "Read PoW difficulty: {}", curr_pow_difficulty_.difficulty);
-}
-
 static void to_json(nlohmann::json& j, const test_result_t& val) {
     j["timestamp"] = val.timestamp;
     j["result"] = to_str(val.result);
@@ -1593,9 +1529,6 @@ std::string ServiceNode::get_stats() const {
     return val.dump(indent);
 }
 
-int ServiceNode::get_curr_pow_difficulty() const {
-    return curr_pow_difficulty_.difficulty;
-}
 
 bool ServiceNode::get_all_messages(std::vector<Item>& all_entries) const {
 
@@ -1616,19 +1549,6 @@ void ServiceNode::process_push_batch(const std::string& blob) {
 
     SISPOP_LOG(debug, "Got {} messages from peers, size: {}", messages.size(),
              blob.size());
-
-#ifndef DISABLE_POW
-    const auto it = std::remove_if(
-        messages.begin(), messages.end(), [this](const message_t& message) {
-            return verify_message(message, pow_history_) == false;
-        });
-    messages.erase(it, messages.end());
-    if (it != messages.end()) {
-        SISPOP_LOG(
-            warn,
-            "Some of the batch messages were removed due to incorrect PoW");
-    }
-#endif
 
     std::vector<Item> items;
     items.reserve(messages.size());

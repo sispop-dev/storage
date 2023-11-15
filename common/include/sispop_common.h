@@ -152,10 +152,8 @@ struct message_t {
     std::string nonce;
 
     message_t(const std::string& pk, const std::string& text,
-              const std::string& hash, uint64_t ttl, uint64_t timestamp,
-              const std::string& nonce)
-        : pub_key(pk), data(text), hash(hash), ttl(ttl), timestamp(timestamp),
-          nonce(nonce) {}
+              const std::string& hash, uint64_t ttl, uint64_t timestamp)
+        : pub_key(pk), data(text), hash(hash), ttl(ttl), timestamp(timestamp) {}
 };
 
 } // namespace sispop
@@ -175,6 +173,8 @@ inline bool operator<(const sn_record_t& lhs, const sn_record_t& rhs) {
     return lhs.pub_key_hex() < rhs.pub_key_hex();
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
 static std::ostream& operator<<(std::ostream& os, const sn_record_t& sn) {
 #ifdef INTEGRATION_TEST
     return os << sn.port();
@@ -188,6 +188,8 @@ static bool operator==(const sn_record_t& lhs, const sn_record_t& rhs) {
     return lhs.pub_key_hex() == rhs.pub_key_hex();
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
 static bool operator!=(const sn_record_t& lhs, const sn_record_t& rhs) {
     return !operator==(lhs, rhs);
 }

@@ -54,7 +54,7 @@ constexpr auto TEST_RETRY_PERIOD = std::chrono::milliseconds(50);
 // corresponds to the client-side limit of 2000 chars
 // of unencrypted message body in our experiments
 // (rounded up)
-constexpr size_t MAX_MESSAGE_BODY = 3100;
+constexpr size_t MAX_MESSAGE_BODY = 310000;
 
 std::shared_ptr<request_t> build_post_request(const char* target,
                                               std::string&& data) {
@@ -292,7 +292,7 @@ connection_t::connection_t(boost::asio::io_context& ioc, ssl::context& ssl_ctx,
 
     SISPOP_LOG(trace, "connection_t [{}]", conn_idx);
 
-    request_.body_limit(1024 * 1024 * 10); // 10 mb
+    request_.body_limit(1024 * 1024 * 50); // 50 mb
 
     start_timestamp_ = std::chrono::steady_clock::now();
 }
@@ -529,22 +529,12 @@ void connection_t::process_blockchain_test_req(uint64_t,
     service_node_.perform_blockchain_test(params, std::move(callback));
 }
 
-static void print_headers(const request_t& req) {
-    SISPOP_LOG(info, "HEADERS:");
-    for (const auto &field: req) {
-        SISPOP_LOG(info, "    [{}]: {}", field.name_string(), field.value());
-    }
-}
 
 void connection_t::process_proxy_req() {
 
     SISPOP_LOG(debug, "Processing proxy request: we are first hop");
 
     const request_t& req = this->request_.get();
-
-#ifdef INTEGRATION_TEST
-    // print_headers(req);
-#endif
 
     delay_response_ = true;
 
@@ -633,7 +623,8 @@ void connection_t::process_file_proxy_req() {
 
     for (auto& el : headers_json.items())
     {
-        req->insert(el.key(), el.value());
+        //req->insert(el.key(), el.value());
+        req->insert(el.key(), (std::string)el.value());
     }
 
 
@@ -650,7 +641,7 @@ void connection_t::process_file_proxy_req() {
         this->write_response();
     };
 
-    make_https_request(ioc_, "https://file.sispopnet.org", req, cb);
+    make_https_request(ioc_, "https://file.sispop.site", req, cb);
 
 }
 
@@ -665,12 +656,7 @@ void connection_t::process_swarm_req(boost::string_view target) {
 
     response_.set(SISPOP_SNODE_SIGNATURE_HEADER, security_.get_cert_signature());
 
-    if (target == "/swarms/push_batch/v1") {
-
-        response_.result(http::status::ok);
-        service_node_.process_push_batch(req.body());
-
-    } else if (target == "/swarms/storage_test/v1") {
+    if (target == "/swarms/storage_test/v1") {
 
         /// Set to "bad request" by default
         response_.result(http::status::bad_request);
@@ -998,7 +984,8 @@ void connection_t::write_response() {
         (*this->response_modifier_)(response_);
     }
 
-    response_.set(http::field::content_length, response_.body().size());
+    response_.set(http::field::content_length,
+                  std::to_string(response_.body().size()));
 
     /// This attempts to write all data to a stream
     /// TODO: handle the case when we are trying to send too much
@@ -1120,39 +1107,7 @@ void connection_t::process_store(const json& params) {
     // Do not store message if the PoW provided is invalid
     std::string messageHash;
 
-    const bool valid_pow =
-        checkPoW(nonce, timestamp, ttl, pk.str(), data, messageHash,
-                 service_node_.get_curr_pow_difficulty());
-#ifndef DISABLE_POW
-    if (!valid_pow) {
-        response_.result(432); // unassigned http code
-        response_.set(http::field::content_type, "application/json");
-
-        json res_body;
-        res_body["difficulty"] = service_node_.get_curr_pow_difficulty();
-        SISPOP_LOG(debug, "Forbidden. Invalid PoW nonce: {}", nonce);
-
-        /// This might throw if not utf-8 endoded
-        body_stream_ << res_body.dump();
-        return;
-    }
-#endif
-
     bool success;
-
-    try {
-        const auto msg =
-            message_t{pk.str(), data, messageHash, ttlInt, timestampInt, nonce};
-        success = service_node_.process_store(msg);
-    } catch (std::exception e) {
-        response_.result(http::status::internal_server_error);
-        response_.set(http::field::content_type, "text/plain");
-        body_stream_ << e.what() << "\n";
-        SISPOP_LOG(critical,
-                 "Internal Server Error. Could not store message for {}",
-                 obfuscate_pubkey(pk.str()));
-        return;
-    }
 
     if (!success) {
         response_.result(http::status::service_unavailable);
@@ -1166,7 +1121,6 @@ void connection_t::process_store(const json& params) {
     response_.result(http::status::ok);
     response_.set(http::field::content_type, "application/json");
     json res_body;
-    res_body["difficulty"] = service_node_.get_curr_pow_difficulty();
     body_stream_ << res_body.dump();
     SISPOP_LOG(trace, "Successfully stored message for {}",
              obfuscate_pubkey(pk.str()));

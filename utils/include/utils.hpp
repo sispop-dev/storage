@@ -79,7 +79,9 @@ static size_t decode_size(size_t sz) {
     return b * d.quot;
 }
 
-static size_t base32_decode_size(size_t sz) { return decode_size<5, 8>(sz); }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+static size_t base32_decode_size(size_t sz)  { return decode_size<5, 8>(sz); }
 
 template <typename Stack, typename V>
 bool base32z_decode(const Stack& stack, V& value) {
